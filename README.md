@@ -1,1 +1,2 @@
 # nitrogen-fixing-maize-simulation-italy
+This repository hosts the R source code and analytical scripts developed to evaluate the economic feasibility and farm-level adoption dynamics of introducing a novel nitrogen-fixing maize variety (analogous to the Sierra Mixe trait) within Italian agricultural systems. The computational framework integrates traditional partial budget modeling with advanced probabilistic and Bayesian techniques to rigorously account for agronomic and economic uncertainties.
