@@ -1,11 +1,39 @@
-#This script aggregates farm-level simulation results to evaluate the macro-sectoral economic impact of adopting
-#nitrogen-fixing maize. It structures the data across simulation scenarios and applies an adoption rule based on a
-#minimum profitability threshold per hectare (set to 30 €/ha, with alternative analyses at 10 €/ha and 20 €/ha 
-#obtained by modifying the adoption condition). By filtering for farms that meet this threshold, the script 
-#computes adopting shares, total benefits, and the percentage increase in gross margin across the entire RICA 
-#sample.
+#This script aggregates farm-level simulation results to evaluate the macro-sectoral 
+#economic impact of adopting nitrogen-fixing maize. 
+#It structures the data across simulation scenarios and applies an adoption rule based on a
+#minimum profitability threshold per hectare (set to 30 €/ha, with alternative analyses at 
+# 10 €/ha and 20 €/ha obtained by modifying the adoption condition). 
+#By filtering for farms that meet this threshold, the script computes adopting shares, total benefits
+#and the percentage increase in gross margin across the entire RICA sample.
+# ==============================================================================
+# SCRIPT PURPOSE: Threshold Adoption Scenario Analysis (30 €/ha Threshold)
+# ==============================================================================
+# NOTE FOR REPRODUCIBILITY:
+# To ensure full transparency and eliminate external dependencies on pre-calculated 
+# Excel spreadsheets, this script explicitly computes the scenario-specific columns 
+# directly from baseline variables (such as 'Sementi' for baseline seed costs and 
+# 'Amount_saving_N_fert' for nitrogen fertilizer savings).
+# As detailed in the main text, seed cost increases are derived by applying 
+# proportional premiums (0%, 5%, 10%, and 16%) to baseline seed costs, and net 
+# benefits per hectare are subsequently obtained by subtracting these incremental 
+# costs from the nitrogen savings. Only the column "Amount_of_savin_N_Fert" 
+#has been pre-calculated in a different RICA dataset named RICA_Fertilizzanti.xlsx, whose data
+#are subject to statistical confidentiality and third-party access restrictions. 
+# ==============================================================================
 library(dplyr)
 library(tidyr)
+maize_crops <- maize_crops %>%
+  mutate(
+    Seed_cost_increase_eur_00 = Sementi * 0.00,
+    Seed_cost_increase_eur_05 = Sementi * 0.05,
+    Seed_cost_increase_eur_10 = Sementi * 0.10,
+    Seed_cost_increase_eur_16 = Sementi * 0.16,
+    
+    Benefit_N_fix_00_Ha = (Amount_of_saving_N_fert - Seed_cost_increase_eur_00)/SUPERFICIE_UTIL,
+    Benefit_N_fix_05_Ha = (Amount_of_saving_N_fert - Seed_cost_increase_eur_05)/SUPERFICIE_UTIL,
+    Benefit_N_fix_10_Ha = (Amount_of_saving_N_fert - Seed_cost_increase_eur_10)/SUPERFICIE_UTIL,
+    Benefit_N_fix_16_Ha = (Amount_of_saving_N_fert - Seed_cost_increase_eur_16)/SUPERFICIE_UTIL
+  )
 
 # 1. Convert to long format and zero out benefits below the threshold (< 30 €/ha)
 maize_long <- maize_crops %>%
@@ -65,8 +93,8 @@ pivot_table <- maize_long %>%
     # Percentage increase of Gross Margin calculated on the ENTIRE SAMPLE (macro-sectoral impact)
     Pct_Sectoral_Gross_Margin_Increase = (Total_Benefit_Euro / Total_Sample_Gross_Margin) * 100
   ) %>%
-  select(
-    Anno,
+  dplyr::select(
+    Year,
     Simulation,
     Adopting_Observations,
     Pct_Adopting_Farms,
